@@ -21,8 +21,9 @@ void StatusIpcService::HandleMessage(u32 data)
     u8 flags = 0;
     if (isDSiMode())
     {
-        /** @brief BPTWL register 0x20: low nibble is battery level, bit 7 is charger present. */
+        rtos_lockMutex(&gI2cMutex);
         u8 raw = mcu_readReg(0x20);
+        rtos_unlockMutex(&gI2cMutex);
         out->batteryLevel = (u8)(raw & 0x0F);
         flags |= STATUS_FLAG_HAS_FINE_LEVEL;
         if (raw & 0x80)
@@ -32,11 +33,13 @@ void StatusIpcService::HandleMessage(u32 data)
     }
     else
     {
+        rtos_lockMutex(&gSpiMutex);
         out->batteryLevel = pmic_isBatteryLow() ? 1 : 0;
         if (pmic_isExternalPowerConnected())
         {
             flags |= STATUS_FLAG_CHARGING;
         }
+        rtos_unlockMutex(&gSpiMutex);
     }
     out->flags = flags;
 
