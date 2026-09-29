@@ -96,6 +96,9 @@ private:
     VramState _vramStateBeforeMakeBottomScreenView;
     VramState _vramStateAfterMakeBottomScreenView;
     bool _changeDisplayMode = false;
+    // Set when navigation leaves the favorites view, by any route. Focus returns to the
+    // heart that opens favorites once the folder has loaded. Consumed at FolderLoadDone.
+    bool _focusFavoritesButtonAfterFolderLoad = false;
 
     IconButton2DView::VramToken _iconButtonViewVram;
 

@@ -23,6 +23,13 @@ RomBrowserController::RomBrowserController(
 
 void RomBrowserController::NavigateToPath(const TCHAR* name)
 {
+    bool inFavoritesView = strcmp(_navigatePath, ":favorites") == 0;
+    bool toFavoritesView = strcmp(name, ":favorites") == 0;
+    _isLeavingFavorites = inFavoritesView && !toFavoritesView;
+    if (toFavoritesView && !inFavoritesView)
+    {
+        RememberFavoritesReturnSelection();
+    }
     StringUtil::Copy(_navigatePath, name, sizeof(_navigatePath) / sizeof(_navigatePath[0]));
     _stateMachine.Fire(RomBrowserStateTrigger::Navigate);
 }
@@ -312,6 +319,12 @@ void RomBrowserController::HandleNavigateTrigger()
         }
         else
         {
+            if (strcmp(_navigatePath, ".") == 0 && _favoritesReturnFileName[0] != 0)
+            {
+                // leaving the favorites view, select what was selected before opening it
+                _navigateFileName = _favoritesReturnFileName;
+                _navigateScrollOffset = _favoritesReturnScrollOffset;
+            }
             if (strcmp(_navigatePath, "/") != 0) // can't f_stat on root dir
             {
                 FILINFO fileInfo;
@@ -537,6 +550,27 @@ void RomBrowserController::ToggleFavorite(const FileInfo& fileInfo)
         _favoritesService->Save();
         return TaskResult<void>::Completed();
     });
+}
+
+void RomBrowserController::RememberFavoritesReturnSelection()
+{
+    _favoritesReturnFileName[0] = 0;
+    _favoritesReturnScrollOffset = 0;
+    if (!_romBrowserViewModel.IsValid())
+    {
+        return;
+    }
+
+    const auto& fileInfoManager = _romBrowserViewModel->GetFileInfoManager();
+    int selectedItem = _romBrowserViewModel->GetSelectedItem();
+    if (selectedItem < 0 || selectedItem >= (int)fileInfoManager.GetItemCount())
+    {
+        return;
+    }
+
+    StringUtil::Copy(_favoritesReturnFileName, fileInfoManager.GetItem(selectedItem).GetFileName(),
+        sizeof(_favoritesReturnFileName) / sizeof(_favoritesReturnFileName[0]));
+    _favoritesReturnScrollOffset = _romBrowserViewModel->GetScrollOffset();
 }
 
 void RomBrowserController::PreserveFavoriteSelectionAfterRemoval(const FileInfo& fileInfo)

@@ -42,6 +42,9 @@ public:
     const SdFolder& GetSdFolder() const override { return *_sdFolder; }
     const TCHAR* GetCurrentPath() const override { return _navigatePath; }
 
+    /// @brief Whether the navigation in progress leaves the favorites view.
+    bool IsLeavingFavorites() const { return _isLeavingFavorites; }
+
     const RomBrowserStateMachine& GetStateMachine() const override { return _stateMachine; }
 
     const SharedPtr<RomBrowserViewModel>& GetRomBrowserViewModel() override { return _romBrowserViewModel; }
@@ -72,7 +75,7 @@ private:
     SharedPtr<RomBrowserViewModel> _romBrowserViewModel;
     std::unique_ptr<SdFolder> _newSdFolder;
     RomBrowserStateMachine _stateMachine;
-    TCHAR _navigatePath[256];
+    TCHAR _navigatePath[256] = { 0 };
     TCHAR* _navigateFileName;
     /// @brief Full path of the item to select once the folder finishes loading, or nullptr.
     ///        Only the favorites view sets it - browsed folders select by file name.
@@ -86,6 +89,12 @@ private:
     ///        view model cannot be truncated by that clear.
     TCHAR _navigateFavoritePath[256] = { 0 };
     int _pendingFavoriteScrollOffset = 0;
+    /// @brief Name of the item that was selected in the folder the favorites view was opened
+    ///        from, selected again with its scroll offset when the favorites view is left.
+    ///        Empty when nothing was selected, e.g. when the favorites view was restored at start.
+    TCHAR _favoritesReturnFileName[256] = { 0 };
+    int _favoritesReturnScrollOffset = 0;
+    bool _isLeavingFavorites = false;
     int _navigateScrollOffset = 0;
     FileInfo _triggerFileInfo;
     QueueTask<void> _navigateTask;
@@ -109,6 +118,7 @@ private:
     ///         different file, so storing it would favorite the wrong item.
     bool GetFileInfoPath(const FileInfo& fileInfo, char* pathBuffer, u32 bufferSize) const;
     void PreserveFavoriteSelectionAfterRemoval(const FileInfo& fileInfo);
+    void RememberFavoritesReturnSelection();
     void ToggleFavoriteAtPath(const char* path);
     void RemoveFavoriteAtPath(const char* path);
     void UpdateLastUsedFilepath();

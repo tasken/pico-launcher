@@ -50,6 +50,11 @@ public:
         return focusManager.IsFocusInside(_romBrowserAppBarView.GetPointer());
     }
 
+    void FocusAppBarFavoritesButton(FocusManager& focusManager)
+    {
+        _romBrowserAppBarView->FocusFavoritesButton(focusManager);
+    }
+
 private:
     RomBrowserBottomScreenViewModel* _viewModel;
     const IRomBrowserViewFactory* _romBrowserViewFactory;

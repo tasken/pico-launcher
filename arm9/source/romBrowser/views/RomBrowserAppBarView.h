@@ -26,6 +26,11 @@ public:
         _appBarView->Focus(focusManager, 0);
     }
 
+    void FocusFavoritesButton(FocusManager& focusManager)
+    {
+        _appBarView->Focus(focusManager, APP_BAR_BUTTON_FAVORITE);
+    }
+
 private:
     enum AppBarButton
     {

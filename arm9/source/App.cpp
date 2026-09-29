@@ -329,6 +329,8 @@ void App::HandleHideDisplaySettingsTrigger()
 
 void App::HandleNavigateTrigger()
 {
+    if (_romBrowserController.IsLeavingFavorites())
+        _focusFavoritesButtonAfterFolderLoad = true;
     if (!_romBrowserBottomScreenView->IsAppBarFocused(_focusManager))
         _focusManager.Unfocus();
 }
@@ -346,8 +348,11 @@ void App::HandleFolderLoadDoneTrigger()
         _theme->GetRomBrowserViewFactory());
     _romBrowserTopScreenView->InitVram(_subVramContext);
     _romBrowserBottomScreenView->RomBrowserViewModelInvalidated(_mainVramContext);
-    if (!_focusManager.GetCurrentFocus())
+    if (_focusFavoritesButtonAfterFolderLoad)
+        _romBrowserBottomScreenView->FocusAppBarFavoritesButton(_focusManager);
+    else if (!_focusManager.GetCurrentFocus())
         _romBrowserBottomScreenView->Focus(_focusManager);
+    _focusFavoritesButtonAfterFolderLoad = false;
 }
 
 void App::HandleChangeDisplayModeTrigger(RomBrowserState newState)
