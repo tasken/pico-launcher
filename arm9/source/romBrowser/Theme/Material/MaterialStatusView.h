@@ -35,6 +35,7 @@ private:
     u32 _batteryVramOffsets[BatteryIconCount] = {};
     BatteryIcon _batteryIcon = BatteryIcon::Full;
     bool _batteryWarning = false;
+    bool _batteryVisible = true;
     char _lastClockText[ClockTextBufferSize] = "";
     bool _darkTheme;
 

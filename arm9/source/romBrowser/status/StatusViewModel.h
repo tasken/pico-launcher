@@ -24,6 +24,9 @@ public:
     /// @brief Returns whether the battery should use warning ink.
     bool IsBatteryWarning() const { return _batteryDisplay.warning; }
 
+    /// @brief Returns whether the battery icon is visible during this blink phase.
+    bool IsBatteryVisible() const { return !_batteryDisplay.blink || _showColon; }
+
 private:
     static constexpr u32 STATUS_POLL_FRAMES = 60;   ///< Roughly 1s at 59.8Hz.
     static constexpr u32 CLOCK_BLINK_FRAMES = 30;   ///< Toggle every 0.5s for a 1s blink cycle.
@@ -40,7 +43,7 @@ private:
     u8 _lastMinute = 0xFF;
     u32 _blinkCounter = 0;
     bool _showColon = true;
-    BatteryDisplay _batteryDisplay { BatteryIcon::Full, false };
+    BatteryDisplay _batteryDisplay { BatteryIcon::Full, false, false };
 
     StatusPayload _pendingPayload {};   ///< Raw payload handed off from the background thread.
     volatile bool _resultReady = false;

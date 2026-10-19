@@ -72,6 +72,7 @@ void MaterialStatusView::Update()
 
     _batteryIcon = _viewModel->GetBatteryIcon();
     _batteryWarning = _viewModel->IsBatteryWarning();
+    _batteryVisible = _viewModel->IsBatteryVisible();
 
     const char* clockText = _viewModel->GetClockText();
     if (strcmp(clockText, _lastClockText) != 0)
@@ -93,16 +94,19 @@ void MaterialStatusView::Draw(GraphicsContext& graphicsContext)
     _clock->SetBackgroundColor(background);
     _clock->SetForegroundColor(_materialColorScheme->onSurface);
 
-    const int batteryX = 236;
-    const int batteryY = 1;
-    u32 paletteRow = graphicsContext.GetPaletteManager().AllocRow(
-        GradientPalette(background, ink), batteryY, batteryY + 16);
-
-    gfx_oam_entry_t* oam = graphicsContext.GetOamManager().AllocOams(1);
-    OamBuilder::OamWithSize<16, 16>(batteryX, batteryY, _batteryVramOffsets[(int)_batteryIcon] >> 7)
-        .WithPalette16(paletteRow)
-        .WithPriority(graphicsContext.GetPriority())
-        .Build(oam[0]);
+    if (_batteryVisible)
+    {
+        const int batteryX = 236;
+        const int batteryY = 1;
+        u32 paletteRow = graphicsContext.GetPaletteManager().AllocRow(
+            GradientPalette(background, ink), batteryY, batteryY + 16);
+        gfx_oam_entry_t* oam = graphicsContext.GetOamManager().AllocOams(1);
+        OamBuilder::OamWithSize<16, 16>(
+            batteryX, batteryY, _batteryVramOffsets[(int)_batteryIcon] >> 7)
+            .WithPalette16(paletteRow)
+            .WithPriority(graphicsContext.GetPriority())
+            .Build(oam[0]);
+    }
 
     ViewContainer::Draw(graphicsContext);
 }
